@@ -1,4 +1,16 @@
 import { addDoc, collection, doc, serverTimestamp, setDoc } from 'firebase/firestore'
+import {
+  AlertTriangle,
+  ArrowRight,
+  BriefcaseMedical,
+  Check,
+  ClipboardList,
+  Clock,
+  Lock,
+  PenLine,
+  Stethoscope,
+  User,
+} from 'lucide-react'
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SignaturePad from '../components/SignaturePad.jsx'
@@ -19,12 +31,12 @@ const GENDERS = [
   { value: 'prefer_not', label: 'Prefer not to say' },
 ]
 
-function SectionCard({ icon, title, subtitle, children }) {
+function SectionCard({ icon: Icon, title, subtitle, children }) {
   return (
     <section className="rounded-xl bg-surface-card p-5 shadow-sm">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-secondary-container text-on-secondary-container">
-          <span className="material-symbols-outlined text-[20px]">{icon}</span>
+          <Icon className="h-5 w-5" />
         </div>
         <div>
           <h2 className="text-lg font-semibold text-on-surface">{title}</h2>
@@ -155,13 +167,13 @@ export default function IntakeForm() {
       <div className="mx-auto flex w-full max-w-md flex-col px-4 pt-6 pb-32">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-on-primary">
-              <span className="material-symbols-outlined text-[18px]">local_hospital</span>
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary text-on-primary">
+              <Stethoscope className="h-[18px] w-[18px]" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-primary">IntakeFlow</span>
           </div>
           <div className="flex items-center gap-1 rounded-full bg-secondary-container/40 px-3 py-1 text-xs font-semibold text-secondary">
-            <span className="material-symbols-outlined text-[16px]">lock</span>
+            <Lock className="h-4 w-4" />
             <span>Secure Intake</span>
           </div>
         </div>
@@ -177,7 +189,7 @@ export default function IntakeForm() {
               </span>
             </div>
             <div className="flex flex-shrink-0 items-center gap-1 rounded-full bg-secondary-container/50 px-3 py-1 text-xs font-semibold text-secondary">
-              <span className="material-symbols-outlined text-[15px]">schedule</span>
+              <Clock className="h-[15px] w-[15px]" />
               <span>~3 mins</span>
             </div>
           </div>
@@ -189,7 +201,7 @@ export default function IntakeForm() {
 
         <form id="intake-form" onSubmit={handleSubmit} className="flex flex-col gap-5">
           <SectionCard
-            icon="person"
+            icon={User}
             title="Personal Information"
             subtitle="Verify legal identity for clinical records"
           >
@@ -246,7 +258,7 @@ export default function IntakeForm() {
           </SectionCard>
 
           <SectionCard
-            icon="assignment"
+            icon={ClipboardList}
             title="Visit Reason"
             subtitle="Clinical motivation & current symptoms"
           >
@@ -262,7 +274,7 @@ export default function IntakeForm() {
           </SectionCard>
 
           <SectionCard
-            icon="medical_services"
+            icon={BriefcaseMedical}
             title="Medical History"
             subtitle="Help us avoid dangerous interactions"
           >
@@ -281,9 +293,7 @@ export default function IntakeForm() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="flex h-6 w-6 items-center justify-center rounded bg-white text-primary">
-                          {conditions[c.key] && (
-                            <span className="material-symbols-outlined text-[18px]">check</span>
-                          )}
+                          {conditions[c.key] && <Check className="h-[18px] w-[18px]" />}
                         </div>
                         <span className="text-base text-on-surface">{c.label}</span>
                       </div>
@@ -318,7 +328,7 @@ export default function IntakeForm() {
 
               <div className="flex flex-col gap-2 rounded-lg bg-error-container/40 p-4">
                 <div className="flex items-center gap-2 text-error">
-                  <span className="material-symbols-outlined text-[20px]">warning</span>
+                  <AlertTriangle className="h-5 w-5" />
                   <span className="text-sm font-medium">
                     Known Allergies (Food, Latex, Penicillin, etc.)
                   </span>
@@ -339,7 +349,7 @@ export default function IntakeForm() {
             </div>
           </SectionCard>
 
-          <SectionCard icon="draw" title="Consent & Signature" subtitle="Acknowledgment & authorization">
+          <SectionCard icon={PenLine} title="Consent & Signature" subtitle="Acknowledgment & authorization">
             <div className="flex flex-col gap-4">
               <div className="rounded-lg bg-surface-low p-4 text-sm leading-relaxed text-on-surface-variant">
                 I certify that the information provided is accurate and complete to the best of
@@ -385,12 +395,12 @@ export default function IntakeForm() {
             ) : (
               <>
                 <span>Submit Intake Form</span>
-                <span className="material-symbols-outlined text-[22px]">arrow_forward</span>
+                <ArrowRight className="h-[22px] w-[22px]" />
               </>
             )}
           </button>
           <div className="flex items-center justify-center gap-1 text-xs text-on-surface-variant">
-            <span className="material-symbols-outlined text-[14px]">lock</span>
+            <Lock className="h-3.5 w-3.5" />
             <span>256-Bit SSL Encrypted • MetroCare Clinic</span>
           </div>
         </div>

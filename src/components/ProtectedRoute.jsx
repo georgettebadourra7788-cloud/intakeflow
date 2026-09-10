@@ -1,3 +1,4 @@
+import { Loader2 } from 'lucide-react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
@@ -7,9 +8,7 @@ export default function ProtectedRoute({ children }) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface">
-        <span className="material-symbols-outlined animate-spin text-[28px] text-primary">
-          progress_activity
-        </span>
+        <Loader2 className="h-7 w-7 animate-spin text-primary" />
       </div>
     )
   }

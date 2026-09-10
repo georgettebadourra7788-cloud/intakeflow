@@ -1,4 +1,5 @@
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore'
+import { AlertTriangle, ArrowLeft, CheckCircle2, Loader2, Undo2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { db } from '../firebase.js'
@@ -71,9 +72,7 @@ export default function IntakeDetail() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-surface">
-        <span className="material-symbols-outlined animate-spin text-[28px] text-primary">
-          progress_activity
-        </span>
+        <Loader2 className="h-7 w-7 animate-spin text-primary" />
       </div>
     )
   }
@@ -107,7 +106,7 @@ export default function IntakeDetail() {
             className="flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant hover:text-primary"
             aria-label="Back to dashboard"
           >
-            <span className="material-symbols-outlined text-[22px]">arrow_back</span>
+            <ArrowLeft className="h-[22px] w-[22px]" />
           </button>
           <div className="flex flex-col">
             <span className="text-xs leading-none font-semibold text-secondary">Staff Detail</span>
@@ -180,7 +179,7 @@ export default function IntakeDetail() {
 
           <div className="mt-4 rounded-lg bg-error-container/40 p-3">
             <div className="flex items-center gap-2 text-error">
-              <span className="material-symbols-outlined text-[18px]">warning</span>
+              <AlertTriangle className="h-[18px] w-[18px]" />
               <h3 className="text-sm font-semibold">Known Allergies</h3>
             </div>
             <p className="mt-1 text-sm text-on-surface">{intake.allergies || 'None reported.'}</p>
@@ -211,9 +210,11 @@ export default function IntakeDetail() {
             disabled={updating}
             className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-semibold text-on-primary shadow-sm disabled:opacity-60"
           >
-            <span className="material-symbols-outlined text-[20px]">
-              {intake.status === 'reviewed' ? 'undo' : 'check_circle'}
-            </span>
+            {intake.status === 'reviewed' ? (
+              <Undo2 className="h-5 w-5" />
+            ) : (
+              <CheckCircle2 className="h-5 w-5" />
+            )}
             {intake.status === 'reviewed' ? 'Mark as New' : 'Mark Intake as Reviewed'}
           </button>
         </section>

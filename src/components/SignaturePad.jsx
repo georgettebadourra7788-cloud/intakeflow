@@ -1,3 +1,4 @@
+import { Pencil, RotateCcw } from 'lucide-react'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 const SignaturePad = forwardRef(function SignaturePad(_props, ref) {
@@ -79,7 +80,7 @@ const SignaturePad = forwardRef(function SignaturePad(_props, ref) {
           onClick={clear}
           className="flex items-center gap-1 text-primary hover:underline"
         >
-          <span className="material-symbols-outlined text-[16px]">restart_alt</span>
+          <RotateCcw className="h-4 w-4" />
           <span>Clear</span>
         </button>
       </div>
@@ -97,7 +98,7 @@ const SignaturePad = forwardRef(function SignaturePad(_props, ref) {
         />
         {!hasSignature && (
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-on-surface-variant/40">
-            <span className="material-symbols-outlined mb-1 text-[28px]">edit</span>
+            <Pencil className="mb-1 h-7 w-7" />
             <span className="text-sm font-semibold tracking-wider uppercase">Sign Here</span>
           </div>
         )}

@@ -1,5 +1,6 @@
 import { signOut } from 'firebase/auth'
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore'
+import { Check, CheckCircle2, ChevronRight, Loader2, LogOut, Search, SearchX } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -53,7 +54,7 @@ function StatusBadge({ status }) {
   if (status === 'reviewed') {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-secondary-container px-3 py-0.5 text-xs font-semibold text-on-secondary-container">
-        <span className="material-symbols-outlined text-[14px]">check</span>
+        <Check className="h-3.5 w-3.5" />
         Reviewed
       </span>
     )
@@ -84,9 +85,7 @@ function IntakeCard({ intake }) {
         </div>
         <div className="flex flex-shrink-0 items-center gap-2">
           <StatusBadge status={intake.status} />
-          <span className="material-symbols-outlined text-[18px] text-on-surface-variant">
-            chevron_right
-          </span>
+          <ChevronRight className="h-[18px] w-[18px] text-on-surface-variant" />
         </div>
       </div>
 
@@ -155,7 +154,7 @@ export default function Dashboard() {
               onClick={() => signOut(auth)}
               className="flex h-10 items-center gap-1 rounded-full bg-surface-low px-3 text-sm font-medium text-on-surface-variant transition-colors hover:text-primary"
             >
-              <span className="material-symbols-outlined text-[18px]">logout</span>
+              <LogOut className="h-[18px] w-[18px]" />
               <span>Sign out</span>
             </button>
           </div>
@@ -175,9 +174,7 @@ export default function Dashboard() {
 
         <section className="flex flex-col gap-3">
           <div className="relative flex items-center rounded-xl bg-surface-card shadow-sm">
-            <span className="material-symbols-outlined absolute left-3 text-[20px] text-on-surface-variant">
-              search
-            </span>
+            <Search className="absolute left-3 h-5 w-5 text-on-surface-variant" />
             <input
               type="text"
               value={search}
@@ -213,9 +210,7 @@ export default function Dashboard() {
 
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <span className="material-symbols-outlined animate-spin text-[28px] text-primary">
-              progress_activity
-            </span>
+            <Loader2 className="h-7 w-7 animate-spin text-primary" />
           </div>
         ) : filteredIntakes.length > 0 ? (
           <section className="flex flex-col gap-3">
@@ -226,9 +221,11 @@ export default function Dashboard() {
         ) : (
           <section className="my-4 flex flex-col items-center justify-center rounded-xl bg-surface-card p-8 text-center shadow-sm">
             <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-surface-low">
-              <span className="material-symbols-outlined text-[48px] text-primary">
-                {hasSearch ? 'search_off' : 'task_alt'}
-              </span>
+              {hasSearch ? (
+                <SearchX className="h-12 w-12 text-primary" />
+              ) : (
+                <CheckCircle2 className="h-12 w-12 text-primary" />
+              )}
             </div>
             <h3 className="mb-1 text-lg font-semibold text-on-surface">
               {hasSearch

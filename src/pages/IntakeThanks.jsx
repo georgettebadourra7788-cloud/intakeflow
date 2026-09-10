@@ -1,10 +1,11 @@
+import { BadgeCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 export default function IntakeThanks() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4 font-sans text-center text-on-surface">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary-container text-secondary">
-        <span className="material-symbols-outlined text-[32px]">verified</span>
+        <BadgeCheck className="h-8 w-8" />
       </div>
       <h1 className="mt-5 text-2xl font-semibold tracking-tight text-on-surface">
         Intake Received!

@@ -1,4 +1,5 @@
 import { signInWithEmailAndPassword } from 'firebase/auth'
+import { Stethoscope } from 'lucide-react'
 import { useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -37,8 +38,8 @@ export default function Login() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface px-4 font-sans">
       <div className="w-full max-w-sm rounded-xl bg-surface-card p-6 shadow-sm">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-on-primary">
-            <span className="material-symbols-outlined text-[20px]">local_hospital</span>
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary text-on-primary">
+            <Stethoscope className="h-5 w-5" />
           </div>
           <h1 className="text-lg font-semibold tracking-tight text-primary">IntakeFlow</h1>
           <p className="text-sm text-on-surface-variant">Sign in to the clinic staff dashboard</p>
