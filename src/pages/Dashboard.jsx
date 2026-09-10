@@ -1,10 +1,17 @@
-import { collection, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { signOut } from 'firebase/auth'
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { auth, db } from '../firebase.js'
 
-function formatRelativeTime(date) {
+const DATE_FILTERS = [
+  { value: 'today', label: 'Today' },
+  { value: 'week', label: 'This Week' },
+  { value: 'all', label: 'All' },
+]
+
+function formatTime(date) {
   if (!date) return ''
   const diffMs = Date.now() - date.getTime()
   const diffMin = Math.floor(diffMs / 60000)
@@ -14,14 +21,32 @@ function formatRelativeTime(date) {
   if (diffMin < 60) return `${diffMin}m ago (${clock})`
   const diffHr = Math.floor(diffMin / 60)
   if (diffHr < 24) return `${diffHr}h ago (${clock})`
-  const diffDay = Math.floor(diffHr / 24)
-  return `${diffDay}d ago (${clock})`
+  return date.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
 }
 
-function toDateInputValue(date) {
-  const offset = date.getTimezoneOffset()
-  const local = new Date(date.getTime() - offset * 60000)
-  return local.toISOString().slice(0, 10)
+function isSameDay(a, b) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  )
+}
+
+function matchesDateFilter(createdAt, filter) {
+  if (filter === 'all') return true
+  if (!createdAt) return false
+  if (filter === 'today') return isSameDay(createdAt, new Date())
+  if (filter === 'week') {
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    return createdAt >= weekAgo
+  }
+  return true
 }
 
 function StatusBadge({ status }) {
@@ -45,30 +70,32 @@ function IntakeCard({ intake }) {
   const createdAt = intake.createdAt?.toDate ? intake.createdAt.toDate() : null
 
   return (
-    <article className="relative flex flex-col overflow-hidden rounded-xl bg-surface-card p-4 shadow-sm">
+    <Link
+      to={`/dashboard/intake/${intake.id}`}
+      className="relative flex flex-col overflow-hidden rounded-xl bg-surface-card p-4 shadow-sm transition-transform active:scale-[0.99]"
+    >
       <div className="absolute inset-y-0 left-0 w-1.5 bg-primary" />
       <div className="flex items-start justify-between gap-2 pl-1">
         <div className="min-w-0">
           <h2 className="truncate text-base leading-tight font-semibold text-on-surface">
             {intake.legalName || 'Unnamed patient'}
           </h2>
-          <span className="text-sm text-on-surface-variant">
-            {intake.dob ? `DOB: ${intake.dob}` : 'DOB: —'}
-            {intake.phone ? ` • ${intake.phone}` : ''}
-          </span>
+          <span className="text-xs text-on-surface-variant">{formatTime(createdAt)}</span>
         </div>
-        <div className="flex flex-shrink-0 flex-col items-end gap-1">
+        <div className="flex flex-shrink-0 items-center gap-2">
           <StatusBadge status={intake.status} />
-          <span className="text-xs text-on-surface-variant">{formatRelativeTime(createdAt)}</span>
+          <span className="material-symbols-outlined text-[18px] text-on-surface-variant">
+            chevron_right
+          </span>
         </div>
       </div>
 
-      <div className="mt-3 rounded-lg bg-surface-low p-3">
+      <div className="mt-3 rounded-lg bg-surface-low p-3 pl-4">
         <p className="line-clamp-2 text-sm text-on-surface">
           "{intake.visitReason || 'No visit reason provided.'}"
         </p>
       </div>
-    </article>
+    </Link>
   )
 }
 
@@ -78,7 +105,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
-  const [dateFilter, setDateFilter] = useState('')
+  const [dateFilter, setDateFilter] = useState('today')
 
   useEffect(() => {
     const q = query(collection(db, 'intakes'), orderBy('createdAt', 'desc'))
@@ -100,24 +127,14 @@ export default function Dashboard() {
   const filteredIntakes = useMemo(() => {
     const term = search.trim().toLowerCase()
     return intakes.filter((intake) => {
-      if (term) {
-        const haystack = `${intake.legalName ?? ''} ${intake.phone ?? ''} ${intake.dob ?? ''} ${intake.visitReason ?? ''}`.toLowerCase()
-        if (!haystack.includes(term)) return false
-      }
-      if (dateFilter) {
-        const createdAt = intake.createdAt?.toDate ? intake.createdAt.toDate() : null
-        if (!createdAt || toDateInputValue(createdAt) !== dateFilter) return false
-      }
+      if (term && !(intake.legalName ?? '').toLowerCase().includes(term)) return false
+      const createdAt = intake.createdAt?.toDate ? intake.createdAt.toDate() : null
+      if (!matchesDateFilter(createdAt, dateFilter)) return false
       return true
     })
   }, [intakes, search, dateFilter])
 
-  const hasActiveFilters = search.trim() !== '' || dateFilter !== ''
-
-  function clearFilters() {
-    setSearch('')
-    setDateFilter('')
-  }
+  const hasSearch = search.trim() !== ''
 
   return (
     <div className="min-h-screen bg-surface font-sans text-on-surface">
@@ -148,16 +165,16 @@ export default function Dashboard() {
       <main className="mx-auto flex max-w-2xl flex-col gap-4 px-4 py-5">
         <section className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold tracking-tight text-on-surface">Today's Intakes</h2>
+            <h2 className="text-xl font-bold tracking-tight text-on-surface">Intake Queue</h2>
             <span className="inline-flex items-center rounded-full bg-secondary-container px-2 py-0.5 text-xs font-semibold text-on-secondary-container">
-              {intakes.length} Total
+              {filteredIntakes.length} shown
             </span>
           </div>
           <p className="text-sm text-on-surface-variant">Real-time triage queue for General Practice Unit</p>
         </section>
 
-        <section className="flex items-center gap-2">
-          <div className="relative flex flex-1 items-center rounded-xl bg-surface-card shadow-sm">
+        <section className="flex flex-col gap-3">
+          <div className="relative flex items-center rounded-xl bg-surface-card shadow-sm">
             <span className="material-symbols-outlined absolute left-3 text-[20px] text-on-surface-variant">
               search
             </span>
@@ -165,20 +182,26 @@ export default function Dashboard() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search patient, DOB, or phone..."
+              placeholder="Search by patient name..."
               className="h-12 w-full rounded-xl bg-transparent pr-4 pl-10 text-base text-on-surface placeholder:text-on-surface-variant focus:outline-none"
             />
           </div>
-          <div className="relative flex items-center rounded-xl bg-surface-card shadow-sm">
-            <span className="material-symbols-outlined pointer-events-none absolute left-3 text-[18px] text-primary">
-              calendar_today
-            </span>
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="h-12 rounded-xl bg-transparent py-2 pr-3 pl-10 text-sm text-on-surface focus:outline-none"
-            />
+
+          <div className="flex items-center gap-2">
+            {DATE_FILTERS.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => setDateFilter(f.value)}
+                className={`flex-1 rounded-full px-4 py-2 text-sm font-medium shadow-sm transition-colors ${
+                  dateFilter === f.value
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-surface-card text-on-surface-variant'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
           </div>
         </section>
 
@@ -204,24 +227,31 @@ export default function Dashboard() {
           <section className="my-4 flex flex-col items-center justify-center rounded-xl bg-surface-card p-8 text-center shadow-sm">
             <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-surface-low">
               <span className="material-symbols-outlined text-[48px] text-primary">
-                {hasActiveFilters ? 'search_off' : 'task_alt'}
+                {hasSearch ? 'search_off' : 'task_alt'}
               </span>
             </div>
             <h3 className="mb-1 text-lg font-semibold text-on-surface">
-              {hasActiveFilters ? 'No matching intakes' : 'All Caught Up!'}
+              {hasSearch
+                ? 'No matching intakes'
+                : dateFilter === 'today'
+                  ? 'No intakes yet today'
+                  : 'No intakes found'}
             </h3>
             <p className="mb-6 max-w-[260px] text-sm text-on-surface-variant">
-              {hasActiveFilters
-                ? 'Try a different search term or date.'
-                : 'No pending intakes yet. New patient self-check-ins will populate here in real-time.'}
+              {hasSearch
+                ? 'Try a different patient name.'
+                : 'New patient self-check-ins will populate here in real-time.'}
             </p>
-            {hasActiveFilters && (
+            {(hasSearch || dateFilter !== 'today') && (
               <button
                 type="button"
-                onClick={clearFilters}
+                onClick={() => {
+                  setSearch('')
+                  setDateFilter('today')
+                }}
                 className="flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-on-primary shadow-sm"
               >
-                Clear filters
+                Reset filters
               </button>
             )}
           </section>
