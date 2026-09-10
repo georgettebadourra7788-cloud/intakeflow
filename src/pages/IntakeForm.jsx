@@ -124,6 +124,7 @@ export default function IntakeForm() {
         allergies,
         consentAgreed,
         signature: signatureRef.current.toDataURL(),
+        status: 'new',
         createdAt: serverTimestamp(),
       }
 

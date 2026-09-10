@@ -2,16 +2,19 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Step 1 intake form has no auth yet; scoped to just create/upsert
-    // so the public form can write without opening read access to PHI.
+    // Step 1 intake form has no auth; scoped to just create/upsert so the
+    // public form can write without opening read access to PHI. Reads are
+    // limited to signed-in clinic staff (Step 2 dashboard).
     match /intakes/{intakeId} {
       allow create: if true;
-      allow read, update, delete: if false;
+      allow read, update: if request.auth != null;
+      allow delete: if false;
     }
 
     match /patients/{phone} {
       allow create, update: if true;
-      allow read, delete: if false;
+      allow read: if request.auth != null;
+      allow delete: if false;
     }
 
     match /{document=**} {
